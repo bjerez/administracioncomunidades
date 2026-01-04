@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Completa para Emprendimiento en Administración de Edificios</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header-main">
+        <div class="container">
+            <h1 class="header-title">Guía para Emprendimiento en Administración de Edificios</h1>
+            <p class="header-subtitle">Roadmap estratégico para lanzar tu negocio en Chile</p>
+        </div>
+    </header>
+
+    <!-- Progress Bar Global -->
+    <div class="progress-container">
+        <div class="container">
+            <div class="progress-info">
+                <span>Progreso Global</span>
+                <span id="globalProgress">0%</span>
+            </div>
+            <div class="progress" style="height: 8px;">
+                <div class="progress-bar" id="globalProgressBar" role="progressbar" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container main-container">
+        <div class="row">
+            <!-- Sidebar Navigation -->
+            <div class="col-lg-3 sidebar-col">
+                <div class="sidebar">
+                    <h5 class="sidebar-title">Secciones</h5>
+                    <div id="sectionsList" class="sections-list">
+                        <!-- Se carga dinámicamente -->
+                    </div>
+                    
+                    <div class="sidebar-actions mt-4">
+                        <button class="btn btn-outline-secondary btn-sm w-100 mb-2" onclick="app.exportProgress()">
+                            Exportar Progreso
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm w-100" onclick="app.importProgress()">
+                            Importar Progreso
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="col-lg-9 content-col">
+                <!-- Welcome Screen -->
+                <div id="welcomeScreen" class="welcome-screen">
+                    <h2>Bienvenido</h2>
+                    <p>Esta guía interactiva te acompañará paso a paso en el proceso de lanzar tu negocio de administración de edificios en Chile.</p>
+                    <p><strong>Cómo usar esta guía:</strong></p>
+                    <ul>
+                        <li>Navega por las secciones usando el menú lateral</li>
+                        <li>Marca cada ítem del checklist según tu avance</li>
+                        <li>Tu progreso se guarda automáticamente en tu navegador</li>
+                        <li>Puedes exportar/importar tu progreso para respaldo</li>
+                    </ul>
+                    <p class="mt-4">
+                        <strong>Usuario objetivo:</strong> Emprendedor con experiencia práctica en gestión y liderazgo, sin formación formal, que comenzará en paralelo a su trabajo actual.
+                    </p>
+                    <div class="alert alert-info mt-4">
+                        <strong>Nota:</strong> Esta guía actualmente tiene las secciones 0-5 disponibles. Las secciones 6-11 estarán disponibles próximamente. El sistema las cargará automáticamente cuando estén listas.
+                    </div>
+                </div>
+
+                <!-- Section Content -->
+                <div id="sectionContent" class="section-content" style="display: none;">
+                    <!-- Section Header -->
+                    <div class="section-header">
+                        <div class="section-number" id="sectionNumber"></div>
+                        <div>
+                            <h2 class="section-title" id="sectionTitle"></h2>
+                            <p class="section-subtitle" id="sectionSubtitle"></p>
+                        </div>
+                    </div>
+
+                    <!-- Section Progress -->
+                    <div class="section-progress">
+                        <div class="progress-info">
+                            <span>Progreso de esta sección</span>
+                            <span id="sectionProgress">0%</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar" id="sectionProgressBar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Why Important -->
+                    <div class="content-block">
+                        <h3 class="content-block-title">Por qué es importante</h3>
+                        <div id="whyImportant" class="content-text"></div>
+                    </div>
+
+                    <!-- Key Concepts -->
+                    <div class="content-block">
+                        <h3 class="content-block-title">Conceptos clave</h3>
+                        <div id="keyConcepts" class="content-text"></div>
+                    </div>
+
+                    <!-- Examples -->
+                    <div class="content-block">
+                        <h3 class="content-block-title">Ejemplos ilustrativos</h3>
+                        <div id="examples" class="content-text"></div>
+                    </div>
+
+                    <!-- Questions -->
+                    <div class="content-block">
+                        <h3 class="content-block-title">Preguntas guía</h3>
+                        <ul id="questions" class="questions-list"></ul>
+                    </div>
+
+                    <!-- Checklist -->
+                    <div class="content-block">
+                        <h3 class="content-block-title">Checklist accionable</h3>
+                        <div id="checklist" class="checklist"></div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="section-navigation">
+                        <button class="btn btn-outline-primary" id="prevBtn" onclick="app.navigatePrev()">
+                            ← Anterior
+                        </button>
+                        <button class="btn btn-primary" id="nextBtn" onclick="app.navigateNext()">
+                            Siguiente →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container text-center">
+            <p class="mb-0">Guía para Emprendimiento en Administración de Edificios - 2026</p>
+        </div>
+    </footer>
+
+    <!-- Import Progress Modal (hidden) -->
+    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="app.handleImport(event)">
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
