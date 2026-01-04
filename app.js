@@ -7,6 +7,13 @@ class GuiaApp {
         this.sections = [];
         this.currentSectionIndex = null;
         this.progress = this.loadProgress();
+        
+        // Referencias a gráficos Chart.js
+        this.currentSectionChart = null;
+        this.globalProgressChart = null;
+        this.globalStatsChart = null;
+        this.sectionsComparisonChart = null;
+        
         this.init();
     }
 
@@ -80,6 +87,9 @@ class GuiaApp {
         });
         
         this.currentSectionIndex = null;
+        
+        // Renderizar gráficos globales
+        setTimeout(() => this.renderGlobalCharts(), 100);
     }
 
     showSection(index) {
@@ -129,6 +139,9 @@ class GuiaApp {
         
         // Section progress
         this.updateSectionProgress(section.id);
+        
+        // Section chart
+        setTimeout(() => this.renderSectionChart(section.id), 100);
         
         // Navigation buttons
         document.getElementById('prevBtn').disabled = this.currentSectionIndex === 0;
@@ -180,21 +193,31 @@ class GuiaApp {
         this.updateSectionProgress(section.id);
         this.updateGlobalProgress();
         this.updateSidebarProgress();
+        
+        // Re-renderizar gráfico de la sección
+        this.renderSectionChart(section.id);
     }
 
     calculateSectionProgress(sectionId) {
         const section = this.sections.find(s => s.id === sectionId);
         if (!section) return 0;
         
-        const totalItems = section.checklist.length;
-        if (totalItems === 0) return 0;
+        // Filtrar ítems que NO están descartados
+        const activeItems = section.checklist.filter(item => {
+            const estado = this.progress[item.id];
+            return estado !== 'descartado';
+        });
         
-        const completedItems = section.checklist.filter(item => {
+        const totalActiveItems = activeItems.length;
+        if (totalActiveItems === 0) return 0;
+        
+        // Contar solo los "atendidos" entre los ítems activos
+        const completedItems = activeItems.filter(item => {
             const estado = this.progress[item.id];
             return estado === 'atendido';
         }).length;
         
-        return Math.round((completedItems / totalItems) * 100);
+        return Math.round((completedItems / totalActiveItems) * 100);
     }
 
     updateSectionProgress(sectionId) {
@@ -224,6 +247,268 @@ class GuiaApp {
                 item.textContent = `${progress}% completado`;
             }
         });
+    }
+
+    // ===================================
+    // ESTADÍSTICAS Y GRÁFICOS
+    // ===================================
+    getSectionStats(sectionId) {
+        const section = this.sections.find(s => s.id === sectionId);
+        if (!section) return null;
+        
+        const stats = {
+            'no-atendido': 0,
+            'atendiendo': 0,
+            'atendido': 0,
+            'descartado': 0
+        };
+        
+        section.checklist.forEach(item => {
+            const estado = this.progress[item.id] || 'no-atendido';
+            stats[estado]++;
+        });
+        
+        return stats;
+    }
+
+    getGlobalStats() {
+        const globalStats = {
+            'no-atendido': 0,
+            'atendiendo': 0,
+            'atendido': 0,
+            'descartado': 0
+        };
+        
+        this.sections.forEach(section => {
+            const stats = this.getSectionStats(section.id);
+            Object.keys(stats).forEach(key => {
+                globalStats[key] += stats[key];
+            });
+        });
+        
+        return globalStats;
+    }
+
+    renderSectionChart(sectionId) {
+        const stats = this.getSectionStats(sectionId);
+        if (!stats) return;
+        
+        const ctx = document.getElementById('sectionStatsChart');
+        if (!ctx) return;
+        
+        // Destruir gráfico anterior si existe
+        if (this.currentSectionChart) {
+            this.currentSectionChart.destroy();
+        }
+        
+        this.currentSectionChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['No atendido', 'Atendiendo', 'Atendido', 'Descartado'],
+                datasets: [{
+                    data: [
+                        stats['no-atendido'],
+                        stats['atendiendo'],
+                        stats['atendido'],
+                        stats['descartado']
+                    ],
+                    backgroundColor: [
+                        '#95a5a6',  // gris
+                        '#f39c12',  // naranja
+                        '#27ae60',  // verde
+                        '#e74c3c'   // rojo
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    renderGlobalCharts() {
+        const globalStats = this.getGlobalStats();
+        
+        // Gráfico 1: Progreso global (circular)
+        const ctx1 = document.getElementById('globalProgressChart');
+        if (ctx1) {
+            if (this.globalProgressChart) {
+                this.globalProgressChart.destroy();
+            }
+            
+            const totalItems = Object.values(globalStats).reduce((a, b) => a + b, 0);
+            const activeItems = totalItems - globalStats['descartado'];
+            const completedItems = globalStats['atendido'];
+            const progressPercent = activeItems > 0 ? Math.round((completedItems / activeItems) * 100) : 0;
+            
+            this.globalProgressChart = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completado', 'Pendiente'],
+                    datasets: [{
+                        data: [completedItems, activeItems - completedItems],
+                        backgroundColor: ['#27ae60', '#ecf0f1'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: true
+                        }
+                    },
+                    cutout: '70%'
+                },
+                plugins: [{
+                    id: 'centerText',
+                    afterDraw: (chart) => {
+                        const ctx = chart.ctx;
+                        const centerX = (chart.chartArea.left + chart.chartArea.right) / 2;
+                        const centerY = (chart.chartArea.top + chart.chartArea.bottom) / 2;
+                        
+                        ctx.save();
+                        ctx.font = 'bold 32px sans-serif';
+                        ctx.fillStyle = '#2c3e50';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(`${progressPercent}%`, centerX, centerY);
+                        ctx.restore();
+                    }
+                }]
+            });
+        }
+        
+        // Gráfico 2: Estadísticas por estado
+        const ctx2 = document.getElementById('globalStatsChart');
+        if (ctx2) {
+            if (this.globalStatsChart) {
+                this.globalStatsChart.destroy();
+            }
+            
+            this.globalStatsChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['No atendido', 'Atendiendo', 'Atendido', 'Descartado'],
+                    datasets: [{
+                        label: 'Cantidad de ítems',
+                        data: [
+                            globalStats['no-atendido'],
+                            globalStats['atendiendo'],
+                            globalStats['atendido'],
+                            globalStats['descartado']
+                        ],
+                        backgroundColor: [
+                            '#95a5a6',
+                            '#f39c12',
+                            '#27ae60',
+                            '#e74c3c'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Gráfico 3: Comparación por sección
+        const ctx3 = document.getElementById('sectionsComparisonChart');
+        if (ctx3) {
+            if (this.sectionsComparisonChart) {
+                this.sectionsComparisonChart.destroy();
+            }
+            
+            const sectionLabels = this.sections.map(s => `${s.number}. ${s.title}`);
+            const sectionProgress = this.sections.map(s => this.calculateSectionProgress(s.id));
+            
+            this.sectionsComparisonChart = new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: sectionLabels,
+                    datasets: [{
+                        label: 'Progreso (%)',
+                        data: sectionProgress,
+                        backgroundColor: sectionProgress.map(p => {
+                            if (p >= 80) return '#27ae60';
+                            if (p >= 50) return '#f39c12';
+                            return '#3498db';
+                        })
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Progreso: ${context.parsed.x}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
     }
 
     // ===================================
@@ -298,6 +583,8 @@ class GuiaApp {
                     // Recargar vista actual
                     if (this.currentSectionIndex !== null) {
                         this.showSection(this.currentSectionIndex);
+                    } else {
+                        this.renderGlobalCharts();
                     }
                     
                     this.updateGlobalProgress();

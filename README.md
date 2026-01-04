@@ -72,6 +72,16 @@ guia-admin-edificios/
 - **Exportar/Importar**: Guarda backup de tu progreso en formato JSON
 - **Indicadores visuales**: Progreso por sección y global
 - **4 estados**: No atendido, Atendiendo, Atendido, Descartado
+- **Lógica inteligente**: Los ítems "Descartados" NO cuentan para el progreso (si tienes 10 ítems, descartaste 3, y completaste 7, tu progreso es 100%, no 70%)
+
+### Gráficos y Visualización
+- **Chart.js integrado**: Visualización profesional con gráficos minimalistas
+- **Dashboard global**: 
+  - Gráfico circular de progreso global
+  - Gráfico de barras con estadísticas por estado
+  - Comparación horizontal de progreso por sección
+- **Gráficos por sección**: Distribución de estados del checklist en gráfico de dona
+- **Actualización en tiempo real**: Los gráficos se actualizan automáticamente al cambiar estados
 
 ### Diseño
 - **Responsive**: Funciona en desktop, tablet y móvil
@@ -154,15 +164,16 @@ El webapp es completamente responsive y funciona perfectamente en dispositivos m
 El progreso se guarda en `localStorage` del navegador con la key `guia-admin-progress`.
 
 ### Límites
-- **Secciones disponibles**: Actualmente 0-5 (6 secciones)
-- **Secciones futuras**: 6-11 se agregarán próximamente
-- **Auto-detección**: El sistema cargará automáticamente nuevas secciones
+- **Secciones disponibles**: 13 secciones completas (0-12)
+- **Auto-detección**: El sistema cargará automáticamente nuevas secciones que agregues
+- **Almacenamiento**: LocalStorage del navegador (sin límite práctico para este uso)
 
 ### Tecnologías
 - HTML5
 - CSS3 (Bootstrap 5 para grid)
 - JavaScript ES6+ (Vanilla, sin frameworks)
 - ES6 Modules para carga dinámica
+- Chart.js 4.4.0 para gráficos interactivos
 
 ## 🆘 Problemas Comunes
 

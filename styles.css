@@ -476,3 +476,42 @@ body {
     border-left-color: var(--info-color);
     color: #1f618d;
 }
+
+/* ===================================
+   CHARTS
+   =================================== */
+.stats-dashboard {
+    background-color: var(--bg-light);
+    padding: 2rem;
+    border-radius: 8px;
+    margin-top: 2rem;
+}
+
+.stats-dashboard h3 {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.chart-container {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    position: relative;
+}
+
+.chart-container canvas {
+    max-height: 300px;
+}
+
+.section-chart-container {
+    background-color: var(--bg-light);
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.section-chart-container h4 {
+    color: var(--secondary-color);
+    font-size: 1rem;
+    font-weight: 600;
+}
